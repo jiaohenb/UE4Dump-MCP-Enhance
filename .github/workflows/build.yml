@@ -1,34 +1,29 @@
-name: Build ImGui Android arm64-v8a
+name: Build UE4Dump-MCP-Enhance arm64
 on:
-  workflow_dispatch: # ✅ 手动触发，手机随时点跑
-
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: 拉取 ImGui 源码
+      - name: Clone source
         uses: actions/checkout@v4
-
-      - name: 安装 Android NDK 26
-        uses: android-actions/setup-android@v3
         with:
-          ndk: "26.3.11579264"
-
-      - name: 编译准备
+          submodules: recursive
+      - name: Download Android NDK r26b
         run: |
-          mkdir -p build-android
-          cd build-android
-          cmake \
-            -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake \
-            -DANDROID_ABI=arm64-v8a \
-            -DANDROID_PLATFORM=android-24 \
-            -DANDROID_STL=c++_static \
-            -DCMAKE_BUILD_TYPE=Release \
-            ..
+          wget https://dl.google.com/android/repository/android-ndk-r26b-linux.zip
+          unzip -q android-ndk-r26b-linux.zip
+          echo "ANDROID_NDK=$PWD/android-ndk-r26b" >> $GITHUB_ENV
+      - name: Build
+        run: |
+          mkdir build && cd build
+          cmake -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake \
+          -DANDROID_ABI=arm64-v8a \
+          -DANDROID_PLATFORM=android-24 \
+          -DANDROID_STL=c++_static ..
           make -j$(nproc)
-
-      - name: 上传编译产物
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: imgui-android-arm64
-          path: build-android/libimgui.so
+          name: UE4Dump-MCP
+          path: build/lib*.so
