@@ -27,9 +27,10 @@ jobs:
                 -DANDROID_PLATFORM=android-24 \
                 -DANDROID_STL=c++_static ..
           make -j$(nproc)
+          ls -R .  # 打印全部文件，看产物在哪
 
-      - name: Upload artifact
+      - name: Upload all build outputs
         uses: actions/upload-artifact@v4
         with:
-          name: UE4Dump-MCP
-          path: build/lib*.so
+          name: UE4Dump-MCP-Full
+          path: build/
